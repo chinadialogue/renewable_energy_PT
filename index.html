@@ -4,9 +4,10 @@
 <head>
   <meta charset="utf-8">
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-  <title>Renewable Energy Map</title>
-  <meta name="description" content="Renewable Energy Map">
+  <title>Energia renovável na América Latina</title>
+  <meta name="description" content="Energia renovável na América Latina">
   <meta name="author" content="Julia Janicki">
+  <link rel="shortcut icon" href="#">
   <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
   <link href="https://fonts.googleapis.com/css2?family=Enriqueta:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Work+Sans:300,400,500,700&display=swap" rel="stylesheet">
@@ -212,8 +213,8 @@
       background-color: #5ab4ac;
     }
 
-    .toggle__pointer.colorStatus {
-      background-color: #D86449;
+    .toggle__pointer.color7 {
+      background-color: #2b8cbe;
     }
 
     .circlesWrapper {
@@ -325,9 +326,11 @@
       color: #fff;
     }
 
-  
+    .mapboxgl-popup.color7 h3 {
+      background: #2b8cbe !important;
+      color: #fff;
+    }
 
-  
     .mapboxgl-container {
       cursor: pointer;
     }
@@ -426,7 +429,13 @@
       border: 2px solid #5ab4ac;
     }
 
+    .button.color7 a {
+      color: #2b8cbe;
+    }
 
+    .button.color7 {
+      border: 2px solid #2b8cbe;
+    }
 
     .button:hover {
       cursor: pointer;
@@ -687,8 +696,7 @@
       margin-top: 10px;
     }
 
-    #start,
-    #start2 {
+    #start{
       position: relative;
       display: inline;
       margin-top: 10px;
@@ -696,12 +704,11 @@
       font-size: 14px;
     }
 
-    #end,
-    #end2 {
+    #end{
       position: relative;
       display: inline;
       margin-top: 10px;
-      margin-left: 140px;
+      margin-left: 120px;
       font-size: 14px;
     }
 
@@ -768,15 +775,13 @@
         margin-left: -20px !important;
       }
 
-      #start,
-      #start2 {
+      #start{
         margin-left: 0px;
         font-size: 11px;
       }
 
-      #end,
-      #end2 {
-        margin-left: 110px;
+      #end{
+        margin-left: 90px;
         font-size: 12px;
       }
     }
@@ -876,9 +881,8 @@
         font-size: 11px;
       }
 
-      #end,
-      #end2 {
-        margin-left: 120px;
+      #end{
+        margin-left: 90px;
         font-size: 11px;
       }
 
@@ -911,7 +915,7 @@
       <span id="toggleConsole">
         <img src="./img/toggle.png" />
       </span>
-      <h1 id='title'></h1>
+      <h1 id='title'>Energia renovável na América Latina</h1>
       <div class="tab-slider--nav">
         <ul class="tab-slider--tabs">
           <li class="tab-slider--trigger activeTab text" rel="tab1">Fonte</li>
@@ -965,6 +969,16 @@
               <h2 id="three">Geotérmica</h2>
             </div>
           </div>
+          <div class="itemWrapper">
+            <div class='row toggle7 item filters' id="filter7">
+              <input id='layer7On' type="radio" value="layer7On" name="toggle7" checked='checked'>
+              <input id='layer7Off' type="radio" value="layer7Off" name="toggle7">
+              <div class="toggle__pointer color7"></div>
+            </div>
+            <div class="item">
+              <h2 id="seven">Misto</h2>
+            </div>
+          </div>
 
 
         </div>
@@ -982,7 +996,7 @@
               </g>
             </svg>
             <div class="item">
-              <p> Limpar status </p>
+              <p> Limpar status</p>
             </div>
           </div>
 
@@ -1033,8 +1047,7 @@
               </g>
             </svg>
             <div class="item">
-              <p> Limpar Capacidade
-              </p>
+              <p> Limpar Capacidade</p>
             </div>
           </div>
           <div class='row itemWrapper'>
@@ -1051,7 +1064,7 @@
               <p id="start"></p>
               <p id="end"></p>
             </div>
-            <p>Capacidade mínima: <span id="selectedCapacity">1</span> MW </p>
+            <p>Capacidade mínima: <span id="selectedCapacity">0.02</span> MW </p>
           </div>
         </div>
       </div>
@@ -1065,7 +1078,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
   <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.14.2/d3.js"></script>
-  <script src="./data.js"></script>
+  <script src="./data/data.js"></script>
   <script>
     var windowWidth = $(window).width();
     var windowHeight = $(window).height();
@@ -1084,7 +1097,6 @@
       }
     });
 
-
     if (viewportWidth < 800 && viewportWidth >= 600) {
       medium = true;
     }
@@ -1092,8 +1104,6 @@
     if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || viewportWidth < 600) {
       mobile = true;
     }
-
-    //console.log(mobile);
 
     if (/iPhone/i.test(navigator.userAgent)) {
       iphone = true;
@@ -1130,23 +1140,22 @@
       'features': []
     };
 
+    var activeStatus = ['Planejado', 'Em construção', 'Em operação'];
+    var activeFuels = ['Eólica', 'Solar', 'Geotérmica','Misto'];
 
-    var activeStatuses = ['Planejado', 'Em construção', 'Em operação']
-    var activeFuels = ['Eólica', 'Solar', 'Geotérmica']
+    var allStatus = ['Planejado', 'Em construção', 'Em operação'];
+    var allFuels = ['Eólica', 'Solar', 'Geotérmica','Misto'];
 
-    var allStatus = ['Planejado', 'Em construção', 'Em operação']
-    var allFuels = ['Eólica', 'Solar', 'Geotérmica']
-
-    var statusFilter = ["in", ["get", "status"], ["literal", activeStatuses]];
+    var statusFilter = ["in", ["get", "status"], ["literal", activeStatus]];
     var fuelFilter = ["in", ["get", "source"], ["literal", activeFuels]];
     var capacityFilter = [">=", ["get", "capacity"], 1];
 
 
-    var min = 1;
-    var max = 100;
-    var maxSlider = 1;
-    var minCircleSize = 1;
-    var maxCircleSize = 24;
+    var min = 0.02;
+    var max = 1500;
+    var maxSlider = 1500;
+    var minCircleSize = 3;
+    var maxCircleSize = 23;
 
     var tab1 = true;
 
@@ -1154,7 +1163,7 @@
 
       map = new mapboxgl.Map({
         container: 'map', // container element id
-        style: 'mapbox://styles/jhjanicki/ck4amgzap10g31cowxsesfbhw',
+        style: 'mapbox://styles/jhjanicki/ck45itf9g23631drw9j74nl8o',
         center: [-71.320135, -14.592424], // initial map center in [lon, lat]
         zoom: 2,
         minZoom: 2
@@ -1164,7 +1173,7 @@
 
       map = new mapboxgl.Map({
         container: 'map', // container element id
-        style: 'mapbox://styles/jhjanicki/ck4amgzap10g31cowxsesfbhw',
+        style: 'mapbox://styles/jhjanicki/ck45itf9g23631drw9j74nl8o',
         center: [-71.320135, -14.592424], // initial map center in [lon, lat]
         zoom: 2,
         minZoom: 2
@@ -1181,14 +1190,14 @@
         $("#console").toggleClass("active");
         $("#toggleConsole img").toggleClass("flip");
       });
-      $("#toggleConsole").css("top", 205);
+      $("#toggleConsole").css("top", 240);
 
       if (medium) {
-        $("#toggleConsole").css("top", 160);
+        $("#toggleConsole").css("top", 200);
       }
 
       if (mobile) {
-        $("#toggleConsole").css("top", 85);
+        $("#toggleConsole").css("top", 115);
       }
 
 
@@ -1199,42 +1208,11 @@
     }
 
 
-
     function init() {
 
       $('#loading').hide();
 
       data.forEach(function (row) {
-
-        // to deal with null lat lon values
-        var status;
-        var capacity;
-
-        if (row.Status == null || row.Status == '') {
-          //console.log(row)
-          status = 'other';
-        } else {
-          status = row.Status;
-        }
-        // to deal with null lat lon values
-
-        if (row.Capacity == '' || row.Longitude == null || row.Longitude == '') {
-
-        } else {
-          if (+row.Capacity < min) {
-            min = +row.Capacity;
-          }
-          if (+row.Capacity > maxSlider) {
-            maxSlider = +row.Capacity;
-          }
-        }
-
-        if (isNaN(+row.Capacity)) {
-          capacity = null;
-        } else {
-          capacity = +row.Capacity;
-        }
-
 
         var feature = {
           'type': 'Feature',
@@ -1246,7 +1224,7 @@
             'country': row.Country,
             'source': row.Source,
             'status': row.Status,
-            'capacity': capacity,
+            'capacity': +row.Capacity,
             'start': row.Start,
             'owner': row.Owner,
             'capital': row.Capital,
@@ -1257,7 +1235,7 @@
             'type': 'Point',
             'coordinates': [+row.Longitude, +row.Latitude],
           }
-        };//[+row.Longitude, +row.Latitude]
+        };
 
         if (row.Longitude != "" && row.Latitude != "" && row.Longitude != null && row.Latitude != null) {
           geoJsonData['features'].push(feature);
@@ -1265,13 +1243,6 @@
 
       });
 
-
-
-      min = 1;
-      max = 1500;
-      maxSlider = 1500;
-      minCircleSize = 3;
-      maxCircleSize = 23;
 
       $("#minCircleVal").html(`${min} MW`);
       $("#maxCircleVal").html(`${max}+ MW`);
@@ -1290,7 +1261,9 @@
             "#a8ddb5",
             ["==", ["get", "source"], 'Solar'],
             "#fdbb84",
-            "#ef3b2c"
+            ["==",["get","source"],"Geotérmica"],
+            "#ef3b2c",
+            "#2b8cbe"
           ],
           'circle-radius': [
             'interpolate',
@@ -1307,8 +1280,6 @@
         }
       });
 
-      // map.setFilter('plants', ['all', statusFilter,fuelFilter,capacityFilter]);
-
 
       $("#start").html(min + 'MW');
       $("#end").html(maxSlider + 'MW');
@@ -1319,34 +1290,27 @@
 
 
       var sliderValG = $("#slider").val();
-      sliderValG = parseInt(sliderValG)
+      sliderValG = parseInt(sliderValG);
 
       function createFilterStatus(filterName, layerOnName, statusString) {
         document.getElementById(filterName).addEventListener('change', function (e) {
-          // update the map filter
           if (e.target.value === layerOnName) {
-            //if layer doesn't exist then push
-
-            if (activeStatuses.indexOf(statusString) == -1) {
-
-              activeStatuses.push(statusString)
+            if (activeStatus.indexOf(statusString) == -1) {
+              activeStatus.push(statusString)
             }
 
-            statusFilter = ["in", ["get", "status"], ["literal", activeStatuses]];
+            statusFilter = ["in", ["get", "status"], ["literal", activeStatus]];
             fuelFilter = ["in", ["get", "source"], ["literal", activeFuels]];
             capacityFilter = [">=", ["get", "capacity"], sliderValG];
 
-            // map.setFilter('plants', ['all', statusFilter,fuelFilter,capacityFilter]);
             map.setFilter('plants', ['all', statusFilter, fuelFilter, capacityFilter]);
 
           } else {
-            //console.log(activeStatuses)
-            //if layer exists then remove it
-            if (activeStatuses.indexOf(statusString) !== -1) {
-              var index = activeStatuses.indexOf(statusString);
-              activeStatuses.splice(index, 1);
+            if (activeStatus.indexOf(statusString) !== -1) {
+              var index = activeStatus.indexOf(statusString);
+              activeStatus.splice(index, 1);
             }
-            statusFilter = ["in", ["get", "status"], ["literal", activeStatuses]];
+            statusFilter = ["in", ["get", "status"], ["literal", activeStatus]];
             fuelFilter = ["in", ["get", "source"], ["literal", activeFuels]];
             capacityFilter = [">=", ["get", "capacity"], sliderValG];
             map.setFilter('plants', ['all', statusFilter, fuelFilter, capacityFilter]);
@@ -1361,67 +1325,52 @@
       createFilterStatus('filter6', 'layer6On', 'Em operação')
 
 
-
-      //
-
       function createFilterFuel(filterName, layerOnName, fuelString) {
         document.getElementById(filterName).addEventListener('change', function (e) {
           // update the map filter
           if (e.target.value === layerOnName) {
+            
             //if layer doesn't exist then push
             if (activeFuels.indexOf(fuelString) == -1) {
               activeFuels.push(fuelString)
             }
-            console.log(activeFuels)
-
-            statusFilter = ["in", ["get", "status"], ["literal", activeStatuses]];
+            statusFilter = ["in", ["get", "status"], ["literal", activeStatus]];
             fuelFilter = ["in", ["get", "source"], ["literal", activeFuels]];
-            // map.setFilter('plants', ['all', statusFilter,fuelFilter,capacityFilter]);
+            capacityFilter = [">=", ["get", "capacity"], sliderValG];
             map.setFilter('plants', ['all', statusFilter, fuelFilter, capacityFilter]);
 
           } else {
-            //console.log(activeStatuses)
             //if layer exists then remove it
             if (activeFuels.indexOf(fuelString) !== -1) {
               var index = activeFuels.indexOf(fuelString);
               activeFuels.splice(index, 1);
             }
-            //  console.log(activeStatuses)
-            statusFilter = ["in", ["get", "status"], ["literal", activeStatuses]];
+            statusFilter = ["in", ["get", "status"], ["literal", activeStatus]];
             fuelFilter = ["in", ["get", "source"], ["literal", activeFuels]];
-            // map.setFilter('plants', ['all', statusFilter,fuelFilter,capacityFilter]);
+            capacityFilter = [">=", ["get", "capacity"], sliderValG];
             map.setFilter('plants', ['all', statusFilter, fuelFilter, capacityFilter]);
 
           }
-
         });
       }
-
-
 
       createFilterFuel('filter1', 'layer1On', 'Eólica')
       createFilterFuel('filter2', 'layer2On', 'Solar')
       createFilterFuel('filter3', 'layer3On', 'Geotérmica')
-
-
-      // map.on('closeAllPopups', () => {
-      //   popup.remove();
-      // });
-
+      createFilterFuel('filter7', 'layer7On', 'Misto')
 
 
       $("#reset").click(function () {
 
         for (var i = 0; i < allStatus.length; i++) {
-          if (activeStatuses.indexOf(allStatus[i]) == -1) {
-            activeStatuses.push(allStatus[i]);
+          if (activeStatus.indexOf(allStatus[i]) == -1) {
+            activeStatus.push(allStatus[i]);
           }
         }
-        statusFilter = ["in", ["get", "status"], ["literal", activeStatuses]];
+        statusFilter = ["in", ["get", "status"], ["literal", activeStatus]];
         fuelFilter = ["in", ["get", "source"], ["literal", activeFuels]];
         capacityFilter = ['>=', ['get', 'capacity'], sliderValG];
         map.setFilter('plants', ['all', statusFilter, fuelFilter, capacityFilter]);
-
 
         $("#layer4On").prop('checked', true);
         $("#layer4Off").prop('checked', false);
@@ -1440,11 +1389,10 @@
             activeFuels.push(allFuels[i]);
           }
         }
-        statusFilter = ["in", ["get", "status"], ["literal", activeStatuses]];
+        statusFilter = ["in", ["get", "status"], ["literal", activeStatus]];
         fuelFilter = ["in", ["get", "source"], ["literal", activeFuels]];
         capacityFilter = ['>=', ['get', 'capacity'], sliderValG];
         map.setFilter('plants', ['all', statusFilter, fuelFilter, capacityFilter]);
-
 
         $("#layer1On").prop('checked', true);
         $("#layer1Off").prop('checked', false);
@@ -1452,6 +1400,8 @@
         $("#layer2Off").prop('checked', false);
         $("#layer3On").prop('checked', true);
         $("#layer3Off").prop('checked', false);
+        $("#layer7On").prop('checked', true);
+        $("#layer7Off").prop('checked', false);
 
 
       });
@@ -1460,14 +1410,14 @@
       $("#reset3").click(function () {
 
 
-        statusFilter = ["in", ["get", "status"], ["literal", activeStatuses]];
+        statusFilter = ["in", ["get", "status"], ["literal", activeStatus]];
         fuelFilter = ["in", ["get", "source"], ["literal", activeFuels]];
-        capacityFilter = ['>=', ['get', 'capacity'], 1];
+        capacityFilter = ['>=', ['get', 'capacity'], 0.02];
         map.setFilter('plants', ['all', statusFilter, fuelFilter, capacityFilter]);
-        sliderValG = 1;
-        $("#slider").val(1);
+        sliderValG = 0.02;
+        $("#slider").val(0.02);
         $("#slider").trigger('change');
-        document.getElementById('selectedCapacity').innerText = 1;
+        document.getElementById('selectedCapacity').innerText = 0.02;
 
       });
 
@@ -1493,14 +1443,14 @@
         }
 
         if (tab1) {
-          $("#toggleConsole").css("top", 205);
+          $("#toggleConsole").css("top", 240);
 
         if (medium) {
-          $("#toggleConsole").css("top", 160);
+          $("#toggleConsole").css("top", 200);
         }
 
         if (mobile) {
-          $("#toggleConsole").css("top", 85);
+          $("#toggleConsole").css("top", 115);
         }
 
           map.setPaintProperty('plants', "circle-color", [
@@ -1509,20 +1459,22 @@
             "#a8ddb5",
             ["==", ["get", "source"], 'Solar'],
             "#fdbb84",
-            "#ef3b2c"
+            ["==", ["get", "source"], 'Geotérmica'],
+            "#ef3b2c",
+            "#2b8cbe"
           ])
 
 
         } else {
 
-          $("#toggleConsole").css("top", 205);
+          $("#toggleConsole").css("top", 230);
 
           if (medium) {
-            $("#toggleConsole").css("top", 160);
+            $("#toggleConsole").css("top", 190);
           }
 
           if (mobile) {
-            $("#toggleConsole").css("top", 85);
+            $("#toggleConsole").css("top", 105);
           }
 
 
@@ -1554,6 +1506,9 @@
 
       document.getElementById('slider').addEventListener('input', function (e) {
         var sliderVal = +e.target.value;
+        if(sliderVal > 1){
+            sliderVal = Math.round(sliderVal);
+        }
         sliderValG = sliderVal;
 
         capacityFilter = ['>=', ['get', 'capacity'], sliderVal];
@@ -1571,10 +1526,9 @@
       });
 
 
-
       map.on('click', 'plants', function (e) {
 
-        console.log(e.features[0].properties);
+        //console.log(e.features[0].properties);
         map.getCanvas().style.cursor = 'pointer';
 
         var latitude = e.features[0].properties.latitude;
@@ -1599,16 +1553,20 @@
         var popupClass = "color1";
         var color = "#a8ddb5";
 
+
         if (tab1) {
           if (source == 'Eólica') {
             color = "#a8ddb5";
-            popupClass = "color1"
+            popupClass = "color1";
           } else if (source == 'Solar') {
             color = "#fdbb84";
-            popupClass = "color2"
-          } else{
+            popupClass = "color2";
+          } else if(source == 'Geotérmica'){
             color = "#ef3b2c";
-            popupClass = "color3"
+            popupClass = "color3";
+          }else{
+            color = "#2b8cbe";
+            popupClass = "color7";
           }
         } else {
           if (status == 'Planejado') {
@@ -1629,7 +1587,7 @@
             closeOnClick: true,
             className: popupClass
           })
-            .setHTML('<h3 class="popupClass"><b>' + name + '</b></h3>'
+          .setHTML('<h3 class="popupClass"><b>' + name + '</b></h3>'
               + '<h4><b>País</b>: ' + country + '<br>'
               + '<b>Localização</b>: ' + location + '<br>'
               + '<b>Fonte de energia</b>: ' + source + '<br>'
@@ -1648,7 +1606,7 @@
             closeOnClick: true,
             className: popupClass
           })
-            .setHTML('<h3 class="popupClass"><b>' + name + '</b></h3>'
+          .setHTML('<h3 class="popupClass"><b>' + name + '</b></h3>'
               + '<h4><b>País</b>: ' + country + '<br>'
               + '<b>Localização</b>: ' + location + '<br>'
               + '<b>Fonte de energia</b>: ' + source + '<br>'
@@ -1704,16 +1662,20 @@
         var popupClass = "color1";
         var color = "#a8ddb5";
 
+
         if (tab1) {
           if (source == 'Eólica') {
             color = "#a8ddb5";
-            popupClass = "color1"
+            popupClass = "color1";
           } else if (source == 'Solar') {
             color = "#fdbb84";
-            popupClass = "color2"
-          } else{
+            popupClass = "color2";
+          } else if(source == 'Geotérmica'){
             color = "#ef3b2c";
-            popupClass = "color3"
+            popupClass = "color3";
+          }else{
+            color = "#2b8cbe";
+            popupClass = "color7";
           }
         } else {
           if (status == 'Planejado') {
@@ -1734,7 +1696,7 @@
             closeOnClick: true,
             className: popupClass
           })
-            .setHTML('<h3 class="popupClass"><b>' + name + '</b></h3>'
+          .setHTML('<h3 class="popupClass"><b>' + name + '</b></h3>'
               + '<h4><b>País</b>: ' + country + '<br>'
               + '<b>Localização</b>: ' + location + '<br>'
               + '<b>Fonte de energia</b>: ' + source + '<br>'
@@ -1753,7 +1715,7 @@
             closeOnClick: true,
             className: popupClass
           })
-            .setHTML('<h3 class="popupClass"><b>' + name + '</b></h3>'
+          .setHTML('<h3 class="popupClass"><b>' + name + '</b></h3>'
               + '<h4><b>País</b>: ' + country + '<br>'
               + '<b>Localização</b>: ' + location + '<br>'
               + '<b>Fonte de energia</b>: ' + source + '<br>'
@@ -1767,7 +1729,6 @@
             .setLngLat([longitude, latitude])
             .addTo(map);
         }
-
 
         $(`.button.${popupClass}`).hover(function () {
           $(".button a").css("color", "white");
